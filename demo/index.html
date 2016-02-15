@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>jQuery Boilerplate</title>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw= sha512-nNo+yCHEyn0smMxSswnf/OnX6/KwJuZTlNZBjauKhTK0c+zT+q5JOCx0UFhXQ6rJR9jg6Es8gPuD2uZcYDLqSw==" crossorigin="anonymous">
+		<link rel="stylesheet" href="../dist/griddlr.css">
+		<script src="../dist/griddlr.js"></script>
+	</head>
+	<body>
+		<div id="element">
+			<div class="row">
+				<div class="col-xs-6">test</div>
+				<div class="col-xs-6">test2</div>
+			</div>
+		</div>
+		<script>
+			$(function() {
+				var $el = $("#element").Griddlr({
+					debug: true
+				});
+
+				var Griddlr = $('#element').data('Griddlr');
+				Griddlr.set('this', 'that');
+			});
+		</script>
+	</body>
+</html>

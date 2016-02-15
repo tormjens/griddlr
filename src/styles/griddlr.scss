@@ -1,0 +1,26 @@
+@import 'variables';
+
+.griddlr-wrapper {
+	border: 1px solid red;
+	padding: 20px;
+	max-width: $griddlr-width;
+	margin: 0 auto;
+	.griddlr-data {
+		display: none;
+	}
+	.griddlr-row {
+		position: relative;
+	}
+	.griddlr-column {
+		position: relative;
+	}
+	.griddlr-button {
+		cursor: pointer;
+
+	}
+	&.griddlr-debug {
+		.griddlr-column-inner {
+			background-color: darken(#fff, 20%);
+		}
+	}
+}
