@@ -13,10 +13,12 @@ do ($ = jQuery, window, document) ->
 	# The actual plugin constructor
 	class Griddlr
 		constructor: (@element, options) ->
-			@$element  = $(@element);
+			@$element  = $(@element)
 			@settings  = $.extend {}, defaults, options
-			@_gutter   = 15;
+			@_gutter   = 15
+			@_width    = 0
 			@_defaults = defaults
+			@_columns  = null;
 			@_name     = pluginName
 			@init()
 
@@ -90,7 +92,17 @@ do ($ = jQuery, window, document) ->
 			classPrefix = @settings.classes.column.replace '*', ''
 			return parseInt className.replace classPrefix, ''
 
+		changeClass: (element, column) ->
+			columns = @getColumns element
+			className = element.className.replace('griddlr-column', '').trim()
+			$(element).removeClass className
+			classPrefix = @settings.classes.column.replace '*', column
+			className = className.replace(className, classPrefix)
+			$(element).addClass className
+
 		drag: (element) ->
+			self = @
+			width = @_width
 			click = 0
 			drag = 0
 			offset = 0
@@ -106,13 +118,17 @@ do ($ = jQuery, window, document) ->
 
 			$(document).on 'mousemove', (e) ->
 				if click
-					if offset > e.offsetX # moving left
-						console.log columns
+					newWidth = e.offsetX;
+					percent = newWidth / width * 100
+					column = self.findColumnByPercentage percent
+					self.changeClass element, column
+
 
 			$(document).on 'mouseup', (e) ->
 				click = 0
 				drag = 0
 				$('html').css 'cursor', ''
+				self.bindColumn $(element)
 
 		addColumn: (column) ->
 			column.addClass('griddlr-column')
@@ -139,9 +155,31 @@ do ($ = jQuery, window, document) ->
 
 		bindResize: ->
 
+		findColumnByPercentage: (percent) ->
+			for item in @_columns by 1
+				if item.range[0] <= percent <= item.range[1]
+					return item.columns
+			return 12
+
+
 		collectData: ->
 			@log 'Collecting data...'
-			@_gutter = parseInt(@dataColumn.css 'padding-left')
+
+			@_gutter  = parseInt(@dataColumn.css 'padding-left')
+			@_width   = @wrapper.outerWidth()
+			columns   = @settings.columns
+			perColumn = 100 / columns
+			columns   = []
+			i         = 0
+
+			for i in [1...13] by 1
+				start = (i * parseInt(perColumn)) - 5
+				end = (i * parseInt(perColumn)) + 5
+				columns.push
+					range: [start, end]
+					columns: i
+
+			@_columns = columns
 
 		columnClass: (columns) ->
 			return @settings.classes.column.replace '*', columns

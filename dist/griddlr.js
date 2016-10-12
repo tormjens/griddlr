@@ -16,7 +16,9 @@
       this.$element = $(this.element);
       this.settings = $.extend({}, defaults, options);
       this._gutter = 15;
+      this._width = 0;
       this._defaults = defaults;
+      this._columns = null;
       this._name = pluginName;
       this.init();
     }
@@ -95,8 +97,20 @@
       return parseInt(className.replace(classPrefix, ''));
     };
 
+    Griddlr.prototype.changeClass = function(element, column) {
+      var className, classPrefix, columns;
+      columns = this.getColumns(element);
+      className = element.className.replace('griddlr-column', '').trim();
+      $(element).removeClass(className);
+      classPrefix = this.settings.classes.column.replace('*', column);
+      className = className.replace(className, classPrefix);
+      return $(element).addClass(className);
+    };
+
     Griddlr.prototype.drag = function(element) {
-      var click, columns, drag, offset, target;
+      var click, columns, drag, offset, self, target, width;
+      self = this;
+      width = this._width;
       click = 0;
       drag = 0;
       offset = 0;
@@ -111,16 +125,19 @@
         }
       });
       $(document).on('mousemove', function(e) {
+        var column, newWidth, percent;
         if (click) {
-          if (offset > e.offsetX) {
-            return console.log(columns);
-          }
+          newWidth = e.offsetX;
+          percent = newWidth / width * 100;
+          column = self.findColumnByPercentage(percent);
+          return self.changeClass(element, column);
         }
       });
       return $(document).on('mouseup', function(e) {
         click = 0;
         drag = 0;
-        return $('html').css('cursor', '');
+        $('html').css('cursor', '');
+        return self.bindColumn($(element));
       });
     };
 
@@ -155,9 +172,36 @@
 
     Griddlr.prototype.bindResize = function() {};
 
+    Griddlr.prototype.findColumnByPercentage = function(percent) {
+      var item, j, len, ref;
+      ref = this._columns;
+      for (j = 0, len = ref.length; j < len; j += 1) {
+        item = ref[j];
+        if ((item.range[0] <= percent && percent <= item.range[1])) {
+          return item.columns;
+        }
+      }
+      return 12;
+    };
+
     Griddlr.prototype.collectData = function() {
+      var columns, end, i, j, perColumn, start;
       this.log('Collecting data...');
-      return this._gutter = parseInt(this.dataColumn.css('padding-left'));
+      this._gutter = parseInt(this.dataColumn.css('padding-left'));
+      this._width = this.wrapper.outerWidth();
+      columns = this.settings.columns;
+      perColumn = 100 / columns;
+      columns = [];
+      i = 0;
+      for (i = j = 1; j < 13; i = j += 1) {
+        start = (i * parseInt(perColumn)) - 5;
+        end = (i * parseInt(perColumn)) + 5;
+        columns.push({
+          range: [start, end],
+          columns: i
+        });
+      }
+      return this._columns = columns;
     };
 
     Griddlr.prototype.columnClass = function(columns) {
